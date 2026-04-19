@@ -5,14 +5,14 @@ import HomePage from './home';
 import {
   ActivityIndicator,
   Alert,
-  View,
+  ImageBackground,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  ImageBackground,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
@@ -33,19 +33,19 @@ export default function HomeScreen() {
   const [view, setView] = useState<AppView>('landing');
   const [currentUser, setCurrentUser] = useState<RegisteredUser | null>(null);
 
-  useEffect(() => {
-    const prepararApp = async () => {
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      setIsAppReady(true);
-    };
-    prepararApp();
-  }, []);
-
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [registeredUser, setRegisteredUser] = useState<RegisteredUser | null>(null);
+
+  useEffect(() => {
+    const prepararApp = async () => {
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      setIsAppReady(true);
+    };
+    prepararApp();
+  }, []);
 
   async function addUser() {
     if (!name.trim() || !email.trim() || !password.trim()) {
@@ -111,7 +111,7 @@ export default function HomeScreen() {
   if (view === 'home') {
     return (
       <HomePage
-        user={currentUser}
+        user={currentUser ?? registeredUser}
         onLogout={() => {
           setCurrentUser(null);
           setView('landing');
@@ -125,31 +125,34 @@ export default function HomeScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <SafeAreaView style={styles.container}>
-        <ScrollView contentContainerStyle={styles.contentContainer} keyboardShouldPersistTaps="handled">
-          {view === 'landing' && (
-            <>
-              <ThemedText style={styles.title}>Welcome to upBeat</ThemedText>
-              <ThemedText style={styles.subtitle}>Choose how you want to continue</ThemedText>
-
-              <TouchableOpacity style={styles.button} onPress={() => setView('register')}>
-                <ThemedText style={styles.buttonText}>Register</ThemedText>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.secondaryButton} onPress={() => setView('login')}>
-                <ThemedText style={styles.secondaryButtonText}>Log In</ThemedText>
-              </TouchableOpacity>
-            </>
-          )}
-
-          {view === 'register' && (
-            <>
-              <ThemedText style={styles.title}>Create Account</ThemedText>
-              <ThemedText style={styles.subtitle}>Register a new user in upBeat</ThemedText>
-
-                {step === 'form' && (
+      <ImageBackground
+        source={require('../../assets/images/cronoPesas.png')}
+        style={styles.authBackground}
+        imageStyle={styles.authBackgroundImage}
+      >
+        <View style={styles.authOverlay}>
+          <SafeAreaView style={styles.container}>
+            <ScrollView contentContainerStyle={styles.contentContainer} keyboardShouldPersistTaps="handled">
+              <View style={styles.panel}>
+                {view === 'landing' && (
                   <>
-                    <ThemedText style={styles.kicker}>Create account</ThemedText>
+                    <ThemedText style={styles.kicker}>UpBeat Access</ThemedText>
+                    <ThemedText style={styles.title}>Welcome to upBeat</ThemedText>
+                    <ThemedText style={styles.subtitle}>Sign Up or Log In to continue</ThemedText>
+
+                    <TouchableOpacity style={styles.button} onPress={() => setView('register')}>
+                      <ThemedText style={styles.buttonText}>Register</ThemedText>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.secondaryButton} onPress={() => setView('login')}>
+                      <ThemedText style={styles.secondaryButtonText}>Log In</ThemedText>
+                    </TouchableOpacity>
+                  </>
+                )}
+
+                {view === 'register' && (
+                  <>
+                    <ThemedText style={styles.kicker}>Create Account</ThemedText>
                     <ThemedText style={styles.title}>Sign Up</ThemedText>
                     <ThemedText style={styles.subtitle}>Register a new user in upBeat</ThemedText>
 
@@ -178,34 +181,56 @@ export default function HomeScreen() {
                       secureTextEntry
                     />
 
-              <TouchableOpacity style={styles.secondaryButton} onPress={() => setView('landing')}>
-                <ThemedText style={styles.secondaryButtonText}>Back</ThemedText>
-              </TouchableOpacity>
-            </>
-          )}
+                    <TouchableOpacity
+                      style={[styles.button, loading && styles.buttonDisabled]}
+                      onPress={addUser}
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <ActivityIndicator color="#FFFFFF" />
+                      ) : (
+                        <ThemedText style={styles.buttonText}>Save and Continue</ThemedText>
+                      )}
+                    </TouchableOpacity>
 
-          {view === 'summary' && registeredUser && (
-            <>
-              <ThemedText style={styles.title}>Registered User</ThemedText>
-              <ThemedText style={styles.subtitle}>This is the information you just saved</ThemedText>
+                    <TouchableOpacity style={styles.secondaryButton} onPress={() => setView('landing')}>
+                      <ThemedText style={styles.secondaryButtonText}>Back</ThemedText>
+                    </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.secondaryButton} onPress={() => setStep('login')}>
+                    <TouchableOpacity style={styles.secondaryButton} onPress={() => setView('login')}>
                       <ThemedText style={styles.secondaryButtonText}>Go to Log In</ThemedText>
                     </TouchableOpacity>
                   </>
                 )}
 
-              <TouchableOpacity style={styles.button} onPress={() => setView('login')}>
-                <ThemedText style={styles.buttonText}>Go to Log In</ThemedText>
-              </TouchableOpacity>
+                {view === 'summary' && registeredUser && (
+                  <>
+                    <ThemedText style={styles.kicker}>Saved Successfully</ThemedText>
+                    <ThemedText style={styles.title}>Registered User</ThemedText>
+                    <ThemedText style={styles.subtitle}>This is the information you just saved</ThemedText>
 
-              <TouchableOpacity style={styles.secondaryButton} onPress={() => setView('register')}>
-                <ThemedText style={styles.secondaryButtonText}>Register Another User</ThemedText>
-              </TouchableOpacity>
-            </>
-          )}
-        </ScrollView>
-      </SafeAreaView>
+                    <View style={styles.card}>
+                      {typeof registeredUser.id === 'number' && (
+                        <ThemedText style={styles.cardText}>ID: {registeredUser.id}</ThemedText>
+                      )}
+                      <ThemedText style={styles.cardText}>Name: {registeredUser.name}</ThemedText>
+                      <ThemedText style={styles.cardText}>Email: {registeredUser.email}</ThemedText>
+                    </View>
+
+                    <TouchableOpacity style={styles.button} onPress={() => setView('login')}>
+                      <ThemedText style={styles.buttonText}>Go to Log In</ThemedText>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.secondaryButton} onPress={() => setView('register')}>
+                      <ThemedText style={styles.secondaryButtonText}>Register Another User</ThemedText>
+                    </TouchableOpacity>
+                  </>
+                )}
+              </View>
+            </ScrollView>
+          </SafeAreaView>
+        </View>
+      </ImageBackground>
     </KeyboardAvoidingView>
   );
 }
@@ -247,7 +272,7 @@ const styles = StyleSheet.create({
     color: '#2C99FF',
     fontSize: 13,
     fontWeight: '800',
-    letterSpacing: 1.4,
+    letterSpacing: 1.2,
     textTransform: 'uppercase',
     marginBottom: 2,
   },
