@@ -17,19 +17,22 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 
-type ScreenStep = 'landing' | 'form' | 'summary' | 'login' | 'home';
-
 type RegisteredUser = {
   id?: number;
   name: string;
   email: string;
 };
 
+type AppView = 'landing' | 'register' | 'summary' | 'login' | 'home';
+
 const API_BASE_URL =
   Platform.OS === 'android' ? 'http://10.0.2.2:8088' : 'http://192.168.100.3:8088';
 
 export default function HomeScreen() {
   const [isAppReady, setIsAppReady] = useState(false);
+  const [view, setView] = useState<AppView>('landing');
+  const [currentUser, setCurrentUser] = useState<RegisteredUser | null>(null);
+
   useEffect(() => {
     const prepararApp = async () => {
       await new Promise(resolve => setTimeout(resolve, 3000));
@@ -38,7 +41,6 @@ export default function HomeScreen() {
     prepararApp();
   }, []);
 
-  const [step, setStep] = useState<ScreenStep>('landing');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -81,7 +83,7 @@ export default function HomeScreen() {
       setName('');
       setEmail('');
       setPassword('');
-      setStep('summary');
+      setView('summary');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       Alert.alert('Registration error', message);
@@ -94,23 +96,26 @@ export default function HomeScreen() {
     return <LandingPage />;
   }
 
-  if (step === 'home') {
+  if (view === 'login') {
     return (
-      <HomePage
-        user={registeredUser ?? { id: 1, name: 'Demo User', email: 'demo@upbeat.app' }}
-        onLogout={() => setStep('landing')}
+      <LoginScreen
+        onLoginSuccess={(user: RegisteredUser) => {
+          setCurrentUser(user);
+          setView('home');
+        }}
+        onGoToRegister={() => setView('register')}
       />
     );
   }
 
-  if (step === 'login') {
+  if (view === 'home') {
     return (
-      <LoginScreen
-        onLoginSuccess={(user: RegisteredUser) => {
-          setRegisteredUser(user);
-          setStep('home');
+      <HomePage
+        user={currentUser}
+        onLogout={() => {
+          setCurrentUser(null);
+          setView('landing');
         }}
-        onGoToRegister={() => setStep('form')}
       />
     );
   }
@@ -120,33 +125,27 @@ export default function HomeScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ImageBackground
-        source={require('../../assets/images/cronoPesas.png')}
-        style={styles.authBackground}
-        imageStyle={styles.authBackgroundImage}
-      >
-        <View style={styles.authOverlay}>
-          <SafeAreaView style={styles.container}>
-            <ScrollView
-              contentContainerStyle={styles.contentContainer}
-              keyboardShouldPersistTaps="handled"
-            >
-              <View style={styles.panel}>
-                {step === 'landing' && (
-                  <>
-                    <ThemedText style={styles.kicker}>UpBeat access</ThemedText>
-                    <ThemedText style={styles.title}>Welcome to upBeat</ThemedText>
-                    <ThemedText style={styles.subtitle}>Sign Up or Log In to continue</ThemedText>
+      <SafeAreaView style={styles.container}>
+        <ScrollView contentContainerStyle={styles.contentContainer} keyboardShouldPersistTaps="handled">
+          {view === 'landing' && (
+            <>
+              <ThemedText style={styles.title}>Welcome to upBeat</ThemedText>
+              <ThemedText style={styles.subtitle}>Choose how you want to continue</ThemedText>
 
-                    <TouchableOpacity style={styles.button} onPress={() => setStep('form')}>
-                      <ThemedText style={styles.buttonText}>Register</ThemedText>
-                    </TouchableOpacity>
+              <TouchableOpacity style={styles.button} onPress={() => setView('register')}>
+                <ThemedText style={styles.buttonText}>Register</ThemedText>
+              </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.secondaryButton} onPress={() => setStep('login')}>
-                      <ThemedText style={styles.secondaryButtonText}>Log In</ThemedText>
-                    </TouchableOpacity>
-                  </>
-                )}
+              <TouchableOpacity style={styles.secondaryButton} onPress={() => setView('login')}>
+                <ThemedText style={styles.secondaryButtonText}>Log In</ThemedText>
+              </TouchableOpacity>
+            </>
+          )}
+
+          {view === 'register' && (
+            <>
+              <ThemedText style={styles.title}>Create Account</ThemedText>
+              <ThemedText style={styles.subtitle}>Register a new user in upBeat</ThemedText>
 
                 {step === 'form' && (
                   <>
@@ -179,21 +178,16 @@ export default function HomeScreen() {
                       secureTextEntry
                     />
 
-                    <TouchableOpacity
-                      style={[styles.button, loading && styles.buttonDisabled]}
-                      onPress={addUser}
-                      disabled={loading}
-                    >
-                      {loading ? (
-                        <ActivityIndicator color="#FFFFFF" />
-                      ) : (
-                        <ThemedText style={styles.buttonText}>Save and Continue</ThemedText>
-                      )}
-                    </TouchableOpacity>
+              <TouchableOpacity style={styles.secondaryButton} onPress={() => setView('landing')}>
+                <ThemedText style={styles.secondaryButtonText}>Back</ThemedText>
+              </TouchableOpacity>
+            </>
+          )}
 
-                    <TouchableOpacity style={styles.secondaryButton} onPress={() => setStep('landing')}>
-                      <ThemedText style={styles.secondaryButtonText}>Back</ThemedText>
-                    </TouchableOpacity>
+          {view === 'summary' && registeredUser && (
+            <>
+              <ThemedText style={styles.title}>Registered User</ThemedText>
+              <ThemedText style={styles.subtitle}>This is the information you just saved</ThemedText>
 
                     <TouchableOpacity style={styles.secondaryButton} onPress={() => setStep('login')}>
                       <ThemedText style={styles.secondaryButtonText}>Go to Log In</ThemedText>
@@ -201,38 +195,17 @@ export default function HomeScreen() {
                   </>
                 )}
 
-                {step === 'summary' && registeredUser && (
-                  <>
-                    <ThemedText style={styles.kicker}>Saved successfully</ThemedText>
-                    <ThemedText style={styles.title}>Registered User</ThemedText>
-                    <ThemedText style={styles.subtitle}>This is the information you just saved</ThemedText>
+              <TouchableOpacity style={styles.button} onPress={() => setView('login')}>
+                <ThemedText style={styles.buttonText}>Go to Log In</ThemedText>
+              </TouchableOpacity>
 
-                    <View style={styles.card}>
-                      {typeof registeredUser.id === 'number' && (
-                        <ThemedText style={styles.cardText}>ID: {registeredUser.id}</ThemedText>
-                      )}
-                      <ThemedText style={styles.cardText}>Name: {registeredUser.name}</ThemedText>
-                      <ThemedText style={styles.cardText}>Email: {registeredUser.email}</ThemedText>
-                    </View>
-
-                    <TouchableOpacity style={styles.button} onPress={() => setStep('home')}>
-                      <ThemedText style={styles.buttonText}>Go To Home</ThemedText>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={styles.secondaryButton} onPress={() => setStep('form')}>
-                      <ThemedText style={styles.secondaryButtonText}>Register Another User</ThemedText>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={styles.secondaryButton} onPress={() => setStep('login')}>
-                      <ThemedText style={styles.secondaryButtonText}>Log In</ThemedText>
-                    </TouchableOpacity>
-                  </>
-                )}
-              </View>
-            </ScrollView>
-          </SafeAreaView>
-        </View>
-      </ImageBackground>
+              <TouchableOpacity style={styles.secondaryButton} onPress={() => setView('register')}>
+                <ThemedText style={styles.secondaryButtonText}>Register Another User</ThemedText>
+              </TouchableOpacity>
+            </>
+          )}
+        </ScrollView>
+      </SafeAreaView>
     </KeyboardAvoidingView>
   );
 }
