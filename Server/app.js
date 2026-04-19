@@ -78,6 +78,71 @@ app.post('/user/login', async (req, res) => {
     });
 });
 
+app.get('/exercises', async (_req, res) => {
+    const exercises = await getExercises();
+    res.status(200).send(exercises);
+});
+
+app.get('/users/:userId/routines', async (req, res) => {
+    const routines = await getRoutinesByUserId(req.params.userId);
+    res.status(200).send(routines);
+});
+
+app.get('/routines/:id', async (req, res) => {
+    const routine = await getRoutineById(req.params.id);
+
+    if (!routine) {
+        return res.status(404).send({ message: 'Routine not found' });
+    }
+
+    res.status(200).send(routine);
+});
+
+app.post('/routines', async (req, res) => {
+    const { userId, name, exerciseIds } = req.body;
+
+    if (!userId || !name || !Array.isArray(exerciseIds) || exerciseIds.length === 0) {
+        return res.status(400).send({ message: 'userId, name and at least one exercise are required' });
+    }
+
+    const routineId = await createRoutineWithExercises(userId, name, exerciseIds);
+    const routine = await getRoutineById(routineId);
+    res.status(201).send(routine);
+});
+
+app.post('/routines/:id/exercises', async (req, res) => {
+    const { exerciseId } = req.body;
+
+    if (!exerciseId) {
+        return res.status(400).send({ message: 'exerciseId is required' });
+    }
+
+    await addExerciseToRoutine(req.params.id, exerciseId);
+    const routine = await getRoutineById(req.params.id);
+    res.status(200).send(routine);
+});
+
+app.delete('/routines/:id', async (req, res) => {
+    const removed = await deleteRoutineById(req.params.id);
+
+    if (!removed) {
+        return res.status(404).send({ message: 'Routine not found' });
+    }
+
+    res.status(200).send({ message: 'Routine deleted' });
+});
+
+app.delete('/routines/:id/exercises/:exerciseId', async (req, res) => {
+    const removed = await removeExerciseFromRoutine(req.params.id, req.params.exerciseId);
+
+    if (!removed) {
+        return res.status(404).send({ message: 'Exercise not found in routine' });
+    }
+
+    const routine = await getRoutineById(req.params.id);
+    res.status(200).send(routine);
+});
+
 app.listen(process.env.WEB_PORT, ()=> {
     console.log(`Server running on port ${process.env.WEB_PORT}`)
 });
