@@ -15,7 +15,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-const API_BASE_URL = 'http:192.168.1.9:8088';
+const API_BASE_URL =
+  Platform.OS === 'android' ? 'http://10.0.2.2:8088' : 'http://192.168.100.3:8088';
 
 export default function LoginScreen({ onLoginSuccess, onGoToRegister }: any) {
   const [email, setEmail] = useState('');
