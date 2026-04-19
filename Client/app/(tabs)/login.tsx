@@ -10,6 +10,7 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
+  ImageBackground,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
@@ -63,75 +64,81 @@ export default function LoginScreen({ onLoginSuccess, onGoToRegister }: any) {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <SafeAreaView style={{ flex: 1, backgroundColor: '#D9D9D9' }}>
-        <View style={styles.whiteBackgroundContainer}>
-          <ScrollView contentContainerStyle={styles.contentContainer} keyboardShouldPersistTaps="handled">
-            
-            <View style={styles.header}>
-              <Image 
-                source={require('../../assets/images/logoUpBeat.png')} 
-                style={styles.logo} 
-                resizeMode="contain"
-              />
-            </View>
-
-            <View style={styles.formContainer}>
-              <ThemedText style={styles.title}>Welcome back!</ThemedText>
-              <ThemedText style={styles.subtitle}>Ready to move?</ThemedText>
-
-              <ThemedText style={styles.label}>Email</ThemedText>
-              <View style={styles.inputWrapper}>
-                <TextInput
-                  style={styles.inputStyle}
-                  placeholder="example@mail.com"
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  placeholderTextColor="#999"
+      <ImageBackground
+        source={require('../../assets/images/cronoPesas.png')}
+        style={styles.background}
+        imageStyle={styles.backgroundImage}
+      >
+        <View style={styles.overlay}>
+          <SafeAreaView style={styles.safeArea}>
+            <ScrollView contentContainerStyle={styles.contentContainer} keyboardShouldPersistTaps="handled">
+              <View style={styles.hero}>
+                <Image
+                  source={require('../../assets/images/logoUpBeat.png')}
+                  style={styles.logo}
+                  resizeMode="contain"
                 />
-                <MaterialCommunityIcons name="email-outline" size={24} color="#555" />
+                <ThemedText style={styles.heroTitle}>Train smarter</ThemedText>
+                <ThemedText style={styles.heroSubtitle}>Sign in to resume your routines</ThemedText>
               </View>
 
-              <ThemedText style={styles.label}>Password</ThemedText>
-              <View style={styles.inputWrapper}>
-                <TextInput
-                  style={styles.inputStyle}
-                  placeholder="********"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry={!showPassword}
-                  placeholderTextColor="#999"
-                />
-                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                  <MaterialCommunityIcons 
-                    name={showPassword ? "eye-outline" : "eye-off-outline"} 
-                    size={24} 
-                    color="#555" 
+              <View style={styles.formCard}>
+                <ThemedText style={styles.title}>Welcome back!</ThemedText>
+                <ThemedText style={styles.subtitle}>Ready to move?</ThemedText>
+
+                <ThemedText style={styles.label}>Email</ThemedText>
+                <View style={styles.inputWrapper}>
+                  <TextInput
+                    style={styles.inputStyle}
+                    placeholder="example@mail.com"
+                    value={email}
+                    onChangeText={setEmail}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    placeholderTextColor="#9CA3AF"
                   />
+                  <MaterialCommunityIcons name="email-outline" size={24} color="#667085" />
+                </View>
+
+                <ThemedText style={styles.label}>Password</ThemedText>
+                <View style={styles.inputWrapper}>
+                  <TextInput
+                    style={styles.inputStyle}
+                    placeholder="********"
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry={!showPassword}
+                    placeholderTextColor="#9CA3AF"
+                  />
+                  <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                    <MaterialCommunityIcons
+                      name={showPassword ? 'eye-outline' : 'eye-off-outline'}
+                      size={24}
+                      color="#667085"
+                    />
+                  </TouchableOpacity>
+                </View>
+
+                <TouchableOpacity
+                  style={[styles.mainButton, loading && styles.disabledButton]}
+                  onPress={handleLogin}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <ActivityIndicator color="#FFFFFF" />
+                  ) : (
+                    <ThemedText style={styles.buttonText}>Log In</ThemedText>
+                  )}
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={onGoToRegister} style={styles.linkButton}>
+                  <ThemedText style={styles.linkText}>Don't have an account?</ThemedText>
                 </TouchableOpacity>
               </View>
-
-              <TouchableOpacity
-                style={[styles.mainButton, loading && styles.disabledButton]}
-                onPress={handleLogin}
-                disabled={loading}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#000" />
-                ) : (
-                  <ThemedText style={styles.buttonText}>Log In</ThemedText>
-                )}
-              </TouchableOpacity>
-
-              <TouchableOpacity onPress={onGoToRegister}>
-                <ThemedText style={styles.linkText}>Don't have an account?</ThemedText>
-              </TouchableOpacity>
-            </View>
-
-          </ScrollView>
+            </ScrollView>
+          </SafeAreaView>
         </View>
-      </SafeAreaView>
+      </ImageBackground>
     </KeyboardAvoidingView>
   );
 }
@@ -139,95 +146,129 @@ export default function LoginScreen({ onLoginSuccess, onGoToRegister }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#0B1220',
   },
-  whiteBackgroundContainer: {
+  background: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+  },
+  backgroundImage: {
+    opacity: 0.9,
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(10, 15, 25, 0.58)',
+  },
+  safeArea: {
+    flex: 1,
   },
   contentContainer: {
-    flexGrow: 1, 
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 18,
+    paddingVertical: 28,
+    gap: 16,
   },
-  header: {
-    height: 150, 
-    backgroundColor: '#D9D9D9',
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    marginTop: Platform.OS === 'ios' ? -50 : 0, 
-    paddingTop: Platform.OS === 'ios' ? 50 : 0, 
+  hero: {
+    alignItems: 'center',
+    paddingVertical: 18,
+    paddingHorizontal: 16,
+    borderRadius: 26,
+    backgroundColor: 'rgba(255,255,255,0.10)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.14)',
   },
   logo: {
-    width: 150, 
-    height: 80, 
+    width: 170,
+    height: 86,
   },
-  formContainer: {
-    paddingHorizontal: 30, 
-    alignItems: 'center', 
-    paddingBottom: 40, 
+  heroTitle: {
+    marginTop: 6,
+    color: '#FFFFFF',
+    fontSize: 22,
+    fontWeight: '800',
+  },
+  heroSubtitle: {
+    marginTop: 4,
+    color: 'rgba(255,255,255,0.82)',
+    fontSize: 13,
+  },
+  formCard: {
+    backgroundColor: 'rgba(255,255,255,0.95)',
+    borderRadius: 28,
+    paddingHorizontal: 22,
+    paddingVertical: 24,
+    shadowColor: '#000',
+    shadowOpacity: 0.18,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 8,
   },
   title: {
-    fontSize: 24, 
-    fontWeight: 'bold', 
-    marginTop: 25, 
-    color: '#000', 
-    textAlign: 'center', 
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#101828',
+    textAlign: 'center',
   },
   subtitle: {
-    fontSize: 14, 
-    color: '#888', 
-    marginBottom: 30, 
-    textAlign: 'center', 
+    fontSize: 14,
+    color: '#667085',
+    marginBottom: 22,
+    textAlign: 'center',
   },
   label: {
-    alignSelf: 'flex-start', 
-    fontWeight: '600', 
-    marginBottom: 5, 
-    fontSize: 14, 
-    color: '#333', 
+    alignSelf: 'flex-start',
+    fontWeight: '700',
+    marginBottom: 6,
+    fontSize: 14,
+    color: '#344054',
   },
   inputWrapper: {
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    backgroundColor: '#D9D9D9', 
-    opacity: 0.35, 
-    borderRadius: 25, 
-    paddingHorizontal: 20, 
-    marginBottom: 20, 
-    height: 55, 
-    width: '100%', 
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F2F4F7',
+    borderRadius: 18,
+    paddingHorizontal: 16,
+    marginBottom: 16,
+    height: 56,
+    width: '100%',
+    borderWidth: 1,
+    borderColor: '#E4E7EC',
   },
   inputStyle: {
-    flex: 1, 
-    fontSize: 16, 
-    color: '#000', 
-    height: '100%', 
+    flex: 1,
+    fontSize: 16,
+    color: '#101828',
+    height: '100%',
   },
   mainButton: {
-    backgroundColor: '#2C99FF', 
-    width: '100%', 
-    height: 60, 
-    borderRadius: 20, 
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    marginTop: 30, 
-    elevation: 4, 
-    shadowColor: '#000', 
-    shadowOffset: { width: 0, height: 2 }, 
-    shadowOpacity: 0.2, 
-    shadowRadius: 4, 
+    backgroundColor: '#2C99FF',
+    width: '100%',
+    height: 58,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 12,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   disabledButton: {
-    opacity: 0.7, 
+    opacity: 0.7,
   },
   buttonText: {
-    color: '#000', 
-    fontWeight: 'bold', 
-    fontSize: 18, 
+    color: '#FFFFFF',
+    fontWeight: '800',
+    fontSize: 18,
+  },
+  linkButton: {
+    alignSelf: 'center',
+    marginTop: 8,
   },
   linkText: {
-    color: '#9901BF', 
-    marginTop: 20, 
-    textDecorationLine: 'underline', 
-    fontWeight: '500', 
+    color: '#7F56D9',
+    textDecorationLine: 'underline',
+    fontWeight: '700',
   },
 });

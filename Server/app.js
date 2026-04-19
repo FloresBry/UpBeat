@@ -6,6 +6,16 @@ import {
     deleteUser,
     getUserByEmail,
     updateUser,
+    ensureExercisesSeeded,
+    ensureRoutineDifficultyColumn,
+    syncAllRoutineDifficulties,
+    getExercises,
+    createRoutineWithExercises,
+    getRoutinesByUserId,
+    getRoutineById,
+    deleteRoutineById,
+    removeExerciseFromRoutine,
+    addExerciseToRoutine,
 } from "./database.js";
 
 import cors from 'cors';
@@ -19,10 +29,19 @@ const app = express ();
 app.use(express.json());
 app.use(cors(corsOption));
 
+await ensureExercisesSeeded();
+await ensureRoutineDifficultyColumn();
+await syncAllRoutineDifficulties();
+
 
 app.get("/perfil/:id", async (req,res)=>{
     const user = await getUserById(req.params.id);
     res.status(200).send(user);
+});
+
+app.delete("/usuario/:id",async (req,res)=> {
+    await deleteUser(req.params.id);
+    res.send({message: "User deleted succesfully"});
 });
 
 app.delete("/ususario/:id",async (req,res)=> {

@@ -12,6 +12,7 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
+  ImageBackground,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
@@ -146,42 +147,36 @@ export default function HomeScreen() {
               <ThemedText style={styles.title}>Create Account</ThemedText>
               <ThemedText style={styles.subtitle}>Register a new user in upBeat</ThemedText>
 
-              <TextInput
-                placeholder="Full name"
-                value={name}
-                onChangeText={setName}
-                style={styles.input}
-                autoCapitalize="words"
-              />
+                {step === 'form' && (
+                  <>
+                    <ThemedText style={styles.kicker}>Create account</ThemedText>
+                    <ThemedText style={styles.title}>Sign Up</ThemedText>
+                    <ThemedText style={styles.subtitle}>Register a new user in upBeat</ThemedText>
 
-              <TextInput
-                placeholder="Email"
-                value={email}
-                onChangeText={setEmail}
-                style={styles.input}
-                autoCapitalize="none"
-                keyboardType="email-address"
-              />
+                    <TextInput
+                      placeholder="Full name"
+                      value={name}
+                      onChangeText={setName}
+                      style={styles.input}
+                      autoCapitalize="words"
+                    />
 
-              <TextInput
-                placeholder="Password"
-                value={password}
-                onChangeText={setPassword}
-                style={styles.input}
-                secureTextEntry
-              />
+                    <TextInput
+                      placeholder="Email"
+                      value={email}
+                      onChangeText={setEmail}
+                      style={styles.input}
+                      autoCapitalize="none"
+                      keyboardType="email-address"
+                    />
 
-              <TouchableOpacity
-                style={[styles.button, loading && styles.buttonDisabled]}
-                onPress={addUser}
-                disabled={loading}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#FFFFFF" />
-                ) : (
-                  <ThemedText style={styles.buttonText}>Save and Continue</ThemedText>
-                )}
-              </TouchableOpacity>
+                    <TextInput
+                      placeholder="Password"
+                      value={password}
+                      onChangeText={setPassword}
+                      style={styles.input}
+                      secureTextEntry
+                    />
 
               <TouchableOpacity style={styles.secondaryButton} onPress={() => setView('landing')}>
                 <ThemedText style={styles.secondaryButtonText}>Back</ThemedText>
@@ -194,13 +189,11 @@ export default function HomeScreen() {
               <ThemedText style={styles.title}>Registered User</ThemedText>
               <ThemedText style={styles.subtitle}>This is the information you just saved</ThemedText>
 
-              <View style={styles.card}>
-                {typeof registeredUser.id === 'number' && (
-                  <ThemedText style={styles.cardText}>ID: {registeredUser.id}</ThemedText>
+                    <TouchableOpacity style={styles.secondaryButton} onPress={() => setStep('login')}>
+                      <ThemedText style={styles.secondaryButtonText}>Go to Log In</ThemedText>
+                    </TouchableOpacity>
+                  </>
                 )}
-                <ThemedText style={styles.cardText}>Name: {registeredUser.name}</ThemedText>
-                <ThemedText style={styles.cardText}>Email: {registeredUser.email}</ThemedText>
-              </View>
 
               <TouchableOpacity style={styles.button} onPress={() => setView('login')}>
                 <ThemedText style={styles.buttonText}>Go to Log In</ThemedText>
@@ -222,19 +215,52 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#E9E9EF',
   },
+  authBackground: {
+    flex: 1,
+  },
+  authBackgroundImage: {
+    opacity: 0.92,
+  },
+  authOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(12, 18, 28, 0.55)',
+  },
   contentContainer: {
-    padding: 20,
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 18,
+    paddingVertical: 28,
+  },
+  panel: {
+    backgroundColor: 'rgba(255,255,255,0.94)',
+    borderRadius: 28,
+    paddingHorizontal: 20,
+    paddingVertical: 24,
     gap: 12,
+    shadowColor: '#000',
+    shadowOpacity: 0.18,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 8,
+  },
+  kicker: {
+    color: '#2C99FF',
+    fontSize: 13,
+    fontWeight: '800',
+    letterSpacing: 1.4,
+    textTransform: 'uppercase',
+    marginBottom: 2,
   },
   title: {
     fontWeight: '800',
     fontSize: 28,
     marginBottom: 6,
+    color: '#101828',
   },
   subtitle: {
     fontSize: 15,
-    opacity: 0.75,
-    marginBottom: 10,
+    color: '#4B5563',
+    marginBottom: 8,
   },
   card: {
     backgroundColor: '#FFFFFF',
@@ -258,7 +284,7 @@ const styles = StyleSheet.create({
     borderColor: '#D5D8E2',
   },
   button: {
-    marginTop: 6,
+    marginTop: 8,
     backgroundColor: '#1D4ED8',
     borderRadius: 12,
     minHeight: 48,
